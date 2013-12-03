@@ -1,44 +1,16 @@
 package main
 
 import (
-	"fmt"
-	"github.com/gorilla/mux"
+	"log"
 	"net/http"
-	"html/template"
-	"os"
 )
 
-const port = ":8090"
-
-var myTemplate = template.Must(template.ParseFiles(
-	"templates/index.html",
-))
-
-type MyResponse struct{
-	Title string
-	Page string
-}
-
-func myHandler(w http.ResponseWriter, r *http.Request){
-	response := MyResponse{}
-	response.Title = "My title"
-	response.Page = mux.Vars(r)["page"]
-	if err := myTemplate.Execute(w, response); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-}
+const port = ":80"
 
 func main() {
-	wd, _ := os.Getwd()
-	println("Working directory", wd)
-
-	r := mux.NewRouter()
-
-	r.HandleFunc("/", myHandler)
-	r.HandleFunc("/{page}", myHandler)
-	
-	http.Handle("/", r)
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static/"))))
-	fmt.Println("Running on " + port)
+	// Handle all requests by serving a file of the same name
+	http.Handle("/", http.FileServer(http.Dir(".")))
+	log.Println("Running on " + port)
+	// This call "blocks" meaning the progam runs here forever
 	http.ListenAndServe(port, nil)
 }
