@@ -8,12 +8,18 @@ import (
 )
 
 func main() {
+	// command line flags
 	port := *flag.Int("port", 80, "port to serve on")
 	dir := *flag.String("directory", "web/", "directory of web files")
-	// Handle all requests by serving a file of the same name
-	http.Handle("/", http.FileServer(http.Dir(dir)))
+
+	// handle all requests by serving a file of the same name
+	fs := http.Dir(dir)
+	handler := http.FileServer(fs)
+	http.Handle("/", handler)
+
 	log.Printf("Running on port %d\n", port)
-	// This call "blocks" meaning the progam runs here forever
-	p := fmt.Sprintf(":%d", port)
-	http.ListenAndServe(p, nil)
+
+	// this call blocks -- the progam runs here forever
+	portString := fmt.Sprintf(":%d", port)
+	http.ListenAndServe(portString, nil)
 }
