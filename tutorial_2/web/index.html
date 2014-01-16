@@ -1,20 +1,47 @@
-<html ng-app>
+<!doctype html>
+<html lang="en" ng-app="myapp">
 <head>
-	<title>Tutorial</title>
+	<meta charset="UTF-8">
+	<title>Music</title>
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
 </head>
-<body>
+<body ng-controller="MainCtl">
 	<div class="jumbotron">
-		<h1>Bootstrap's working</h1>
-		<p>
-			So is <i class="fa fa-spinner fa-spin"></i> font-awesome.
-		</p>
+		<h1>My Blog</h1>
 	</div>
-	<div class="container">
-		<input type="text" placeholder="type here" ng-model="yes">
-		<p>Is Angular working? <span ng-bind="yes"></span></p>
+	<div class="col-sm-4">
+		<ul ng-repeat="entry in entries">
+			<li><button class="btn" ng-click="load(entry)">{{entry}}</button></li>
+		</ul>
+	</div>
+	<div class="col-sm-8">
+		{{text}}
 	</div>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.3/angular.min.js"></script>
+<script>
+	var myapp = new angular.module("myapp", []);
+
+	myapp.controller("MainCtl", ["$scope", "$http", function($scope, $http){
+		$scope.entries = [
+			"hello.txt"
+		];
+
+		$scope.selected = null;
+
+		$scope.load = function(entry){
+			$scope.selected = entry;
+
+			$http({
+				method: "GET",
+				url: "/entries/" + entry
+			}).success(function(data){
+				$scope.text = data;
+			}).error(function(data){
+				$scope.text = data;
+			})
+		}
+	}])
+</script>
 </body>
 </html>
