@@ -61,5 +61,6 @@ func main() {
 
 	// this call blocks -- the progam runs here forever
 	portString := fmt.Sprintf(":%d", port)
-	http.ListenAndServe(portString, nil)
+	err := http.ListenAndServe(portString, nil)
+	fmt.Println(err.Error())
 }
