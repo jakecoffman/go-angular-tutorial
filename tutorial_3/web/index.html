@@ -29,10 +29,14 @@
 	});
 
 	myapp.controller("MainCtl", ["$scope", "$http", function($scope, $http){
-		$scope.entries = [
-			"blog/hello",
-			"blog/yo"
-		];
+		$http({
+			method: "GET",
+			url: "/blog"
+		}).success(function(data){
+			$scope.entries = data;
+		}).error(function(error){
+			$scope.text = error;
+		})
 
 		$scope.selected = null;
 
@@ -48,7 +52,7 @@
 				$scope.text = data;
 			})
 		}
-	}])
+	}]);
 </script>
 </body>
 </html>
