@@ -48,18 +48,19 @@ func listEntries(w http.ResponseWriter, r *http.Request) *handlerError {
 
 func main() {
 	// command line flags
-	port := *flag.Int("port", 80, "port to serve on")
-	dir := *flag.String("directory", "web/", "directory of web files")
+	port := flag.Int("port", 80, "port to serve on")
+	dir := flag.String("directory", "web/", "directory of web files")
+	flag.Parse()
 
 	// handle all requests by serving a file of the same name
-	fs := http.Dir(dir)
+	fs := http.Dir(*dir)
 	fileHandler := http.FileServer(fs)
 	http.Handle("/", fileHandler)
 	http.Handle("/blog", handler(listEntries))
 
-	log.Printf("Running on port %d\n", port)
+	log.Printf("Running on port %d\n", *port)
 
-	portString := fmt.Sprintf(":%d", port)
+	portString := fmt.Sprintf(":%d", *port)
 	// this call blocks -- the progam runs here forever
 	err := http.ListenAndServe(portString, nil)
 	fmt.Println(err.Error())
