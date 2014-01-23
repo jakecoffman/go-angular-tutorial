@@ -20,8 +20,8 @@ func main() {
 
 	log.Printf("Running on port %d\n", *port)
 
-	portString := fmt.Sprintf(":%d", *port)
+	host := fmt.Sprintf("127.0.0.1:%d", *port)
 	// this call blocks -- the progam runs here forever
-	err := http.ListenAndServe(portString, nil)
+	err := http.ListenAndServe(host, nil)
 	fmt.Println(err.Error())
 }
