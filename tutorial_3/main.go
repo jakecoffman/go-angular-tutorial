@@ -59,8 +59,8 @@ func main() {
 
 	log.Printf("Running on port %d\n", port)
 
-	// this call blocks -- the progam runs here forever
 	portString := fmt.Sprintf(":%d", port)
+	// this call blocks -- the progam runs here forever
 	err := http.ListenAndServe(portString, nil)
 	fmt.Println(err.Error())
 }
