@@ -15,8 +15,8 @@ func main() {
 
 	// handle all requests by serving a file of the same name
 	fs := http.Dir(*dir)
-	handler := http.FileServer(fs)
-	http.Handle("/", handler)
+	fileHandler := http.FileServer(fs)
+	http.Handle("/", fileHandler)
 
 	log.Printf("Running on port %d\n", *port)
 
