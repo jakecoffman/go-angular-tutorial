@@ -1,0 +1,75 @@
+<html ng-app="chat">
+<head>
+	<title>Tutorial</title>
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+	<style>
+	#chat {
+			height: 300px;
+			overflow: scroll;
+	}
+	</style>
+</head>
+<body ng-controller="MainCtl">
+	<div class="jumbotron">
+		<h1>My Chat</h1>
+	</div>
+	<div id="chat">
+		<ul>
+			<li ng-repeat="m in messages track by $index">{{m}}</li>
+		</ul>
+	</div>
+	<input type="text" placeholder="type here" ng-model="msg" ng-enter="send()">
+	<button class="btn btn-primary" ng-click="send()">Send</button>
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.3/angular.min.js"></script>
+<script>
+	var app = angular.module("chat", []);
+
+	app.directive('ngEnter', function () {
+		return function (scope, element, attrs) {
+			element.bind("keydown keypress", function (event) {
+				if(event.which === 13) {
+					scope.$apply(function (){
+						scope.$eval(attrs.ngEnter);
+					});
+
+					event.preventDefault();
+				}
+			});
+		};
+	});
+
+	app.controller("MainCtl", ["$scope", function($scope) {
+		$scope.messages = [];
+
+		var conn = new WebSocket("ws://localhost/ws");
+		// called when the server closes the connection
+		conn.onclose = function(e) {
+			$scope.$apply(function(){
+				$scope.messages.push("DISCONNECTED");
+			});
+		};
+
+		// called when the connection to the server is made
+		conn.onopen = function(e) {
+			$scope.$apply(function(){
+				$scope.messages.push("CONNECTED");
+			})
+		};
+
+		// called when a message is received from the server
+		conn.onmessage = function(e){
+			$scope.$apply(function(){
+				$scope.messages.push(e.data);
+			});
+		};
+
+		$scope.send = function() {
+			conn.send($scope.msg);
+			$scope.msg = "";
+		}
+	}]);
+</script>
+</body>
+</html>

@@ -21,6 +21,9 @@
 		</ul>
 	</div>
 	<div class="col-sm-8">
+		<button class="btn btn-danger pull-right" ng-show="selected" ng-click="remove(entry)">
+			<i class="fa fa-trash"></i> Remove entry
+		</button>
 		{{entry.content}}
 	</div>
 <script src="http://code.angularjs.org/1.2.10/angular.min.js"></script>
@@ -54,6 +57,14 @@
 			newEntry.$save();
 			$scope.entries = Blog.query();
 		};
+
+		$scope.remove = function(entry){
+			var entry = Blog.get({name: entry.name});
+			entry.$delete();
+			$scope.selected = null;
+			$scope.entry = {content: "Select an entry"};
+			$scope.entries = Blog.query();
+		}
 	}]);
 </script>
 </body>
