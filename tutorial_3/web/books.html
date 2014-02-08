@@ -62,6 +62,7 @@
 				$scope.books = data;
 				if(idx != undefined) {
 					$scope.selected = $scope.books[idx];
+					$scope.selected.idx = idx;
 				}
 			}, function(error){
 				alert(error.data);
