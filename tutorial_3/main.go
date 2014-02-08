@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -22,8 +23,9 @@ type handlerError struct {
 }
 
 type book struct {
-	title  string
-	author string
+	Title  string `json:"title"`
+	Author string `json:"author"`
+	Id     int    `json:"id"`
 }
 
 var books = make([]book, 0)
@@ -54,11 +56,15 @@ func listBooks(w http.ResponseWriter, r *http.Request) (interface{}, *handlerErr
 }
 
 func getBook(w http.ResponseWriter, r *http.Request) (interface{}, *handlerError) {
-	title := mux.Vars(r)["title"]
-	b, index := getBookByTitle(title)
+	param := mux.Vars(r)["id"]
+	id, e := strconv.Atoi(param)
+	if e != nil {
+		return nil, &handlerError{e, "Id should be an integer", http.StatusBadRequest}
+	}
+	b, index := getBookById(id)
 
 	if index < 0 {
-		return nil, &handlerError{nil, "Could not find entry " + title, http.StatusNotFound}
+		return nil, &handlerError{nil, "Could not find book " + param, http.StatusNotFound}
 	}
 
 	return b, nil
@@ -76,30 +82,42 @@ func addBook(w http.ResponseWriter, r *http.Request) (interface{}, *handlerError
 		return nil, &handlerError{e, "Could not parse JSON", http.StatusBadRequest}
 	}
 
+	payload.Id = getNextId()
 	books = append(books, payload)
 
 	return make(map[string]string), nil
 }
 
 func removeBook(w http.ResponseWriter, r *http.Request) (interface{}, *handlerError) {
-	title := mux.Vars(r)["title"]
-	_, index := getBookByTitle(title)
+	param := mux.Vars(r)["id"]
+	id, e := strconv.Atoi(param)
+	if e != nil {
+		return nil, &handlerError{e, "Id should be an integer", http.StatusBadRequest}
+	}
+	_, index := getBookById(id)
 
 	if index < 0 {
-		return nil, &handlerError{nil, "Could not find entry " + title, http.StatusNotFound}
+		return nil, &handlerError{nil, "Could not find entry " + param, http.StatusNotFound}
 	}
 
 	books = books[:index+copy(books[index:], books[index+1:])]
 	return make(map[string]string), nil
 }
 
-func getBookByTitle(title string) (book, int) {
+func getBookById(id int) (book, int) {
 	for i, b := range books {
-		if b.title == title {
+		if b.Id == id {
 			return b, i
 		}
 	}
 	return book{}, -1
+}
+
+var id = 0
+
+func getNextId() int {
+	id += 1
+	return id
 }
 
 func main() {
@@ -111,13 +129,18 @@ func main() {
 	// handle all requests by serving a file of the same name
 	fs := http.Dir(*dir)
 	fileHandler := http.FileServer(fs)
-	router.Handle("/", fileHandler)
-	router.Handle("/static", fileHandler)
-	router.Handle("/blog", handler(listBooks))
-	router.Handle("/blog/{entry}", handler(addBook)).Methods("POST")
-	router.Handle("/blog/{entry}", handler(getBook)).Methods("GET")
-	router.Handle("/blog/{entry}", handler(removeBook)).Methods("DELETE")
+	router.Handle("/", http.RedirectHandler("/static/", 302))
+	router.Handle("/books", handler(listBooks)).Methods("GET")
+	router.Handle("/books", handler(addBook)).Methods("POST")
+	router.Handle("/books/{id}", handler(getBook)).Methods("GET")
+	router.Handle("/books/{id}", handler(removeBook)).Methods("DELETE")
+	router.PathPrefix("/static/").Handler(http.StripPrefix("/static", fileHandler))
 	http.Handle("/", router)
+
+	books = append(books, book{"Ender's Game", "Orson Scott Card", getNextId()})
+	books = append(books, book{"Code Complete", "Steve McConnell", getNextId()})
+	books = append(books, book{"World War Z", "Max Brooks", getNextId()})
+	books = append(books, book{"Pragmatic Programmer", "David Thomas", getNextId()})
 
 	log.Printf("Running on port %d\n", *port)
 
