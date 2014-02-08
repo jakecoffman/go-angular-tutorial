@@ -20,8 +20,8 @@
 		<div class="row">
 			<div class="col-sm-3 well">
 				<h3>Books</h3>
-				<ul ng-repeat="b in books" class="nav nav-pills nav-stacked">
-					<li ng-class="{active: b.title == selected.title}">
+				<ul class="nav nav-pills nav-stacked">
+					<li ng-class="{active: b.title == selected.title}" ng-repeat="b in books">
 						<a href="" ng-click="get($index)">{{b.title}}</a>
 					</li>
 				</ul>
