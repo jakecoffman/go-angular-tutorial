@@ -1,7 +1,7 @@
 webapp tutorial
 ======================
 
-This tutorial series will help you get a web application up and running using the follwoing technologies:
+This tutorial series will help you get a web application up and running using the following technologies:
 
 * Go for developing the backend
 * Angularjs for developing the frontend
